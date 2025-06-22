@@ -1,0 +1,492 @@
+/* Модальное окно корзины */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+
+.cart-modal {
+  position: relative;
+  background: white;
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  margin: 40px auto;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Заголовок корзины */
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.restaurant-info h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.arrow-icon {
+  margin-left: 8px;
+  color: var(--dark-gray);
+}
+
+.clear-button {
+  background: none;
+  border: none;
+  color: var(--dark-gray);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.clear-button:hover {
+  color: var(--text-color);
+}
+
+/* Список товаров */
+.cart-items {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0 20px;
+}
+
+.cart-item {
+  display: flex;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-gray);
+}
+
+.item-image img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.item-price-weight {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.item-price {
+  color: var(--text-color);
+}
+
+.item-weight {
+  color: var(--dark-gray);
+  margin-left: 4px;
+}
+
+.item-quantity {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.quantity-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quantity-btn:hover {
+  background-color: var(--medium-gray);
+}
+
+.quantity-value {
+  width: 32px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Пустая корзина */
+.cart-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--dark-gray);
+}
+
+/* Сервисный сбор */
+.cart-service-fee {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.service-fee-label {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.service-fee-value {
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Информация о доставке */
+.delivery-info {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: var(--light-gray);
+}
+
+.delivery-icon {
+  margin-right: 12px;
+}
+
+.delivery-text {
+  font-size: 14px;
+}
+
+.delivery-free {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.delivery-min-order {
+  margin-left: 4px;
+  color: var(--dark-gray);
+}
+
+/* Футер корзины */
+.cart-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--medium-gray);
+}
+
+.checkout-button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.total-price {
+  font-weight: 600;
+}
+
+/* Информация о времени доставки */
+.delivery-time-info {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: var(--light-gray);
+  margin-top: 16px;
+}
+
+.delivery-time-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.delivery-eta {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.delivery-details {
+  color: var(--dark-gray);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.info-icon {
+  margin-left: 12px;
+}
+/* Дополнения к cart-modal.component.css */
+
+/* Кнопка закрытия */
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--dark-gray);
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.close-button:hover {
+  background-color: var(--light-gray);
+  color: var(--text-color);
+}
+
+/* Пустая корзина */
+.cart-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--dark-gray);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.cart-empty p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Обработка ошибок изображений */
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Улучшенная анимация модального окна */
+.modal-backdrop {
+  animation: backdropFadeIn 0.3s ease-out;
+}
+
+.cart-modal {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Дополнительные стили к cart-modal.component.css */
+
+/* Сообщение об ошибке */
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px 20px;
+  margin: 0 20px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  border-left: 4px solid #c33;
+}
+
+/* Индикатор загрузки */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 12px;
+  color: var(--dark-gray);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--light-gray);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Предупреждение о минимальной сумме заказа */
+.min-order-warning {
+  background: #fff3cd;
+  color: #856404;
+  padding: 12px 20px;
+  margin: 16px 20px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  border-left: 4px solid #ffc107;
+}
+
+/* Стили для кнопки при загрузке */
+.checkout-button.loading {
+  background-color: var(--dark-gray);
+  cursor: not-allowed;
+}
+
+.checkout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--medium-gray);
+}
+
+/* Улучшенное время доставки */
+.delivery-time-info .delivery-eta {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 14px;
+}
+
+.delivery-time-info .delivery-details {
+  color: var(--dark-gray);
+  font-size: 12px;
+}
+
+/* Респонсивность для мобильных устройств */
+@media (max-width: 480px) {
+  .cart-modal {
+    width: 95%;
+    margin: 20px auto;
+    max-height: 95vh;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+  }
+
+  .cart-header {
+    padding: 16px;
+  }
+
+  .cart-items {
+    padding: 0 16px;
+  }
+
+  .cart-service-fee,
+  .delivery-info,
+  .delivery-time-info {
+    padding: 12px 16px;
+  }
+
+  .cart-footer {
+    padding: 16px;
+  }
+
+  .error-message,
+  .min-order-warning {
+    margin: 0 16px 16px;
+    padding: 10px 16px;
+  }
+}
+
+/* Анимации */
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-backdrop {
+  animation: backdropFadeIn 0.3s ease-out;
+}
+
+.cart-modal {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+  .cart-modal {
+    width: 95%;
+    margin: 20px auto;
+  }
+
+  .modal-backdrop {
+    padding: 10px 0;
+  }
+}
+
+/* Анимация */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

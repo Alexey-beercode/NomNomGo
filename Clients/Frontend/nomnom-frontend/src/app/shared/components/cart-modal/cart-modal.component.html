@@ -1,0 +1,120 @@
+<!-- src/app/shared/components/cart-modal/cart-modal.component.html -->
+<div class="modal-backdrop" *ngIf="isVisible" (click)="onBackdropClick($event)" (keydown)="onKeyDown($event)">
+  <div class="cart-modal" (click)="$event.stopPropagation()">
+    <!-- Кнопка закрытия -->
+    <button class="close-button" (click)="hide()" [disabled]="isLoading">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="cart-header">
+      <div class="restaurant-info">
+        <h2>{{ restaurantName }}</h2>
+      </div>
+      <button class="clear-button" (click)="clearCart()" *ngIf="cartItems.length > 0" [disabled]="isLoading">
+        Очистить
+      </button>
+    </div>
+
+    <!-- Сообщение об ошибке -->
+    <div class="error-message" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <!-- Индикатор загрузки -->
+    <div class="loading-indicator" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Оформляем заказ...</span>
+    </div>
+
+    <div class="cart-items" *ngIf="cartItems.length > 0">
+      <div class="cart-item" *ngFor="let item of cartItems; trackBy: trackByItemId">
+        <div class="item-image">
+          <img [src]="getItemImage(item)" [alt]="item.name"
+               (error)="onImageError($event)">
+        </div>
+        <div class="item-details">
+          <div class="item-name">{{ item.name }}</div>
+          <div class="item-price-weight">
+            <span class="item-price">{{ item.price | number:'1.2-2' }}₽</span>
+            <span class="item-weight" *ngIf="item.weight">· {{ item.weight }}</span>
+          </div>
+        </div>
+        <div class="item-quantity">
+          <button
+            class="quantity-btn minus"
+            (click)="decrementQuantity(item)"
+            [disabled]="isLoading">−</button>
+          <span class="quantity-value">{{ item.quantity }}</span>
+          <button
+            class="quantity-btn plus"
+            (click)="incrementQuantity(item)"
+            [disabled]="isLoading">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-empty" *ngIf="cartItems.length === 0">
+      <div class="empty-icon">🛒</div>
+      <p>Ваша корзина пуста</p>
+    </div>
+
+    <!-- Сервисный сбор -->
+    <div class="cart-service-fee" *ngIf="cartItems.length > 0">
+      <span class="service-fee-label">Работа сервиса</span>
+      <span class="service-fee-value">{{ serviceCharge | number:'1.2-2' }}₽</span>
+    </div>
+
+    <!-- Информация о доставке -->
+    <div class="delivery-info" *ngIf="cartItems.length > 0">
+      <div class="delivery-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M13 4C13 3.44772 12.5523 3 12 3C11.4477 3 11 3.44772 11 4V11H4C3.44772 11 3 11.4477 3 12C3 12.5523 3.44772 13 4 13H11V20C11 20.5523 11.4477 21 12 21C12.5523 21 13 20.5523 13 20V13H20C20.5523 13 21 12.5523 21 12C21 11.4477 20.5523 11 20 11H13V4Z" fill="var(--primary-color)"/>
+        </svg>
+      </div>
+      <div class="delivery-text">
+        <span class="delivery-free" *ngIf="subtotal >= deliveryMinOrder">Доставка 0₽</span>
+        <span class="delivery-min-order" *ngIf="subtotal < deliveryMinOrder">
+          Доставка 0₽ от {{ deliveryMinOrder }}₽
+        </span>
+      </div>
+    </div>
+
+    <!-- Время доставки -->
+    <div class="delivery-time-info" *ngIf="cartItems.length > 0">
+      <div class="delivery-time-text">
+        <div class="delivery-eta">{{ deliveryTime }}</div>
+        <div class="delivery-details">Время доставки</div>
+      </div>
+      <div class="info-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Предупреждение о минимальной сумме -->
+    <div class="min-order-warning" *ngIf="cartItems.length > 0 && subtotal < deliveryMinOrder">
+      <span>Минимальная сумма заказа: {{ deliveryMinOrder }}₽</span>
+      <span>Не хватает: {{ (deliveryMinOrder - subtotal) | number:'1.2-2' }}₽</span>
+    </div>
+
+    <div class="cart-footer" *ngIf="cartItems.length > 0">
+      <button
+        class="checkout-button"
+        (click)="proceedToCheckout()"
+        [disabled]="!canProceedToCheckout"
+        [class.loading]="isLoading">
+        <span *ngIf="!isLoading">
+          {{ subtotal >= deliveryMinOrder ? 'Далее' : 'Добавьте еще на ' + (deliveryMinOrder - subtotal | number:'1.2-2') + '₽' }}
+        </span>
+        <span *ngIf="isLoading">Оформляем...</span>
+        <span class="total-price" *ngIf="!isLoading && canProceedToCheckout">
+          {{ totalPrice | number:'1.2-2' }}₽
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

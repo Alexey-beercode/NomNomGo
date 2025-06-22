@@ -1,0 +1,89 @@
+<div class="modal-backdrop" *ngIf="isVisible">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Укажите адрес доставки</h2>
+        <p class="modal-subtitle">Чтобы курьер смог вас найти</p>
+        <button type="button" class="close-button" (click)="hide()">×</button>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 21L16.65 16.65" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Введите адрес"
+          [(ngModel)]="searchText"
+          (keyup.enter)="search()">
+        <button *ngIf="searchText"
+                class="clear-button"
+                (click)="searchText = ''">×</button>
+      </div>
+
+      <div class="map-container">
+        <app-map
+          (addressFound)="onAddressFound($event)"
+          (mapClicked)="onMapClick($event)">
+        </app-map>
+      </div>
+
+      <div class="selected-address" *ngIf="selectedAddress">
+        <p>{{selectedAddress}}</p>
+      </div>
+
+      <!-- Новая секция с дополнительными полями -->
+      <div class="delivery-details">
+        <div class="details-row">
+          <div class="detail-field">
+            <label for="entrance">Подъезд</label>
+            <input
+              type="text"
+              id="entrance"
+              class="detail-input"
+              placeholder="№"
+              [(ngModel)]="deliveryDetails.entrance">
+          </div>
+
+          <div class="detail-field">
+            <label for="floor">Этаж</label>
+            <input
+              type="text"
+              id="floor"
+              class="detail-input"
+              placeholder="№"
+              [(ngModel)]="deliveryDetails.floor">
+          </div>
+
+          <div class="detail-field">
+            <label for="apartment">Квартира</label>
+            <input
+              type="text"
+              id="apartment"
+              class="detail-input"
+              placeholder="№"
+              [(ngModel)]="deliveryDetails.apartment">
+          </div>
+        </div>
+
+        <div class="detail-field full-width">
+          <label for="comment">Комментарий</label>
+          <input
+            type="text"
+            id="comment"
+            class="detail-input"
+            placeholder="Например: код домофона"
+            [(ngModel)]="deliveryDetails.comment">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="ok-button" [disabled]="!selectedAddress && !searchText" (click)="confirmAddress()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>

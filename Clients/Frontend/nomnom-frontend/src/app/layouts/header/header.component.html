@@ -1,0 +1,53 @@
+<!-- src/app/shared/components/header/header.component.html -->
+<header class="header">
+  <div class="logo-container">
+    <a href="/" class="logo">
+      <img src="images/logo.png" alt="NomNomGo Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80/2ecc71/ffffff?text=N';">
+    </a>
+  </div>
+
+  <div class="search-container">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Найти ресторан, блюдо или товар"
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="onSearch()">
+    <button class="search-button" (click)="onSearch()">Найти</button>
+  </div>
+
+  <button class="address-button" (click)="showAddressSelect()">
+    <span class="icon location-icon">📍</span>
+    <span class="address-text">{{ currentAddress }}</span>
+    <span class="dropdown-icon">▼</span>
+  </button>
+
+  <div class="spacer"></div>
+
+  <div class="header-actions">
+    <button class="cart-button" (click)="openCart()" [class.has-items]="hasItemsInCart">
+      <div class="cart-icon-container">
+        <svg class="cart-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <!-- Индикатор количества товаров -->
+        <span class="cart-count" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+      </div>
+      <span class="cart-amount">{{ formattedCartTotal }} ₽</span>
+    </button>
+
+    <!-- Кнопка пользователя -->
+    <button class="user-button" (click)="goToProfile()">
+      <svg class="user-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Модальные окна -->
+<app-address-modal #addressModal (addressSelected)="onAddressSelected($event)"></app-address-modal>
+<app-cart-modal #cartModal></app-cart-modal>

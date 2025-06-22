@@ -1,0 +1,25 @@
+.biometric-button {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+}
+
+.biometric-button:hover {
+  background-color: #e8e8e8;
+}
+
+.fingerprint-icon {
+  margin-right: 8px;
+}

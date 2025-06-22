@@ -1,0 +1,24 @@
+<!-- Файл: src/app/features/auth/login-form/login-form.component.html -->
+<div class="login-form">
+  <div class="input-field" *ngIf="type === 'email'">
+    <input
+      type="email"
+      placeholder="Введите почту"
+      [(ngModel)]="email"
+      spellcheck="false"
+      autocomplete="email">
+  </div>
+
+  <div class="input-field" *ngIf="type === 'phone'">
+    <input
+      type="tel"
+      placeholder="Введите телефон"
+      [(ngModel)]="phone"
+      spellcheck="false"
+      autocomplete="tel">
+  </div>
+
+  <button class="submit-button" (click)="onSubmit()">
+    Войти
+  </button>
+</div>

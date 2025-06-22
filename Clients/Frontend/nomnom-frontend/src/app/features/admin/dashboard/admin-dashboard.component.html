@@ -1,0 +1,291 @@
+<!-- src/app/features/admin/dashboard/admin-dashboard.component.html -->
+
+<div class="dashboard" *ngIf="!loading">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Панель управления</h1>
+      <p class="header-subtitle">Добро пожаловать в административную панель NomNomGo</p>
+      <div class="header-meta">
+        <span class="last-updated">{{ getLastUpdatedText() }}</span>
+        <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+          <span class="refresh-icon" [class.spinning]="loading">🔄</span>
+          Обновить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card revenue">
+        <div class="stat-header">
+          <div class="stat-icon">💰</div>
+          <div class="stat-trend positive">
+            <span class="trend-icon">📈</span>
+            +{{ stats.monthlyGrowth | number:'1.1-1' }}%
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatCurrency(stats.totalRevenue) }}</div>
+          <div class="stat-label">Общая выручка</div>
+          <div class="stat-sublabel">За все время</div>
+        </div>
+        <div class="stat-footer">
+          <small>Средний чек: {{ formatCurrency(getAverageOrderValue()) }}</small>
+        </div>
+      </div>
+
+      <div class="stat-card orders">
+        <div class="stat-header">
+          <div class="stat-icon">📋</div>
+          <div class="stat-badge">{{ stats.todayOrders }}</div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatNumber(stats.totalOrders) }}</div>
+          <div class="stat-label">Всего заказов</div>
+          <div class="stat-sublabel">{{ stats.todayOrders }} сегодня</div>
+        </div>
+        <div class="stat-footer">
+          <small>Завершено: {{ getOrdersCompletionRate() | number:'1.0-0' }}%</small>
+        </div>
+      </div>
+
+      <div class="stat-card restaurants">
+        <div class="stat-header">
+          <div class="stat-icon">🏪</div>
+          <div class="stat-utilization">
+            {{ getRestaurantUtilization() | number:'1.0-0' }}%
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatNumber(stats.totalRestaurants) }}</div>
+          <div class="stat-label">Ресторанов</div>
+          <div class="stat-sublabel">{{ stats.activeRestaurants }} активных</div>
+        </div>
+        <div class="stat-footer">
+          <small>Коэффициент использования</small>
+        </div>
+      </div>
+
+      <div class="stat-card users">
+        <div class="stat-header">
+          <div class="stat-icon">👥</div>
+          <div class="stat-trend positive">
+            <span class="trend-icon">📈</span>
+            +15.2%
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatNumber(stats.totalUsers) }}</div>
+          <div class="stat-label">Пользователей</div>
+          <div class="stat-sublabel">Зарегистрировано</div>
+        </div>
+        <div class="stat-footer">
+          <small>Рост за месяц</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <div class="section-header">
+      <h2>Быстрые действия</h2>
+      <p class="section-subtitle">Часто используемые операции</p>
+    </div>
+
+    <div class="actions-grid">
+      <a *ngFor="let action of quickActions"
+         [routerLink]="action.route"
+         class="action-card"
+         [class]="'action-' + action.color"
+         [class.urgent]="action.urgent"
+         (click)="navigateToSection(action.route)">
+
+        <div class="action-header">
+          <div class="action-icon" [class]="'icon-' + action.color">
+            {{ action.icon }}
+          </div>
+          <div class="action-badge" *ngIf="action.badge && action.badge > 0">
+            {{ action.badge }}
+          </div>
+        </div>
+
+        <div class="action-content">
+          <div class="action-title">{{ action.title }}</div>
+          <div class="action-description">{{ action.description }}</div>
+        </div>
+
+        <div class="action-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Recent Activity -->
+    <div class="activity-section">
+      <div class="section-header">
+        <h2>Последняя активность</h2>
+        <a routerLink="/admin/activity" class="view-all-link">
+          Посмотреть все
+          <span class="link-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="activity-container">
+        <div class="activity-list" *ngIf="recentActivities.length > 0; else noActivity">
+          <div class="activity-item"
+               *ngFor="let activity of recentActivities; trackBy: trackActivity"
+               [class]="getActivityTypeClass(activity.type)">
+
+            <div class="activity-icon">{{ activity.icon }}</div>
+
+            <div class="activity-content">
+              <div class="activity-text">{{ activity.text }}</div>
+              <div class="activity-time">{{ activity.time }}</div>
+            </div>
+
+            <div class="activity-type">
+              <span class="type-badge" [class]="'type-' + activity.type">
+                {{ activity.type }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noActivity>
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>Нет последней активности</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Popular Restaurants -->
+    <div class="restaurants-section">
+      <div class="section-header">
+        <h2>Популярные рестораны</h2>
+        <a routerLink="/admin/restaurants" class="view-all-link">
+          Все рестораны
+          <span class="link-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="restaurants-container">
+        <div class="restaurant-list" *ngIf="popularRestaurants.length > 0; else noRestaurants">
+          <div class="restaurant-item"
+               *ngFor="let restaurant of popularRestaurants; let i = index; trackBy: trackRestaurant">
+
+            <div class="restaurant-rank">
+              <span class="rank-number" [class]="'rank-' + (i + 1)">{{ i + 1 }}</span>
+            </div>
+
+            <div class="restaurant-info">
+              <div class="restaurant-name">{{ restaurant.name }}</div>
+              <div class="restaurant-stats">
+                <span class="rating">
+                  <span class="star">⭐</span>
+                  {{ restaurant.rating | number:'1.1-1' }}
+                </span>
+                <span class="orders">{{ restaurant.orders }} заказов</span>
+              </div>
+            </div>
+
+            <div class="restaurant-metrics">
+              <div class="revenue">{{ formatCurrency(restaurant.revenue) }}</div>
+              <div class="growth" [class]="getGrowthClass(restaurant.growth)">
+                <span class="growth-icon">{{ getGrowthIcon(restaurant.growth) }}</span>
+                <span class="growth-text">
+                  {{ restaurant.growth > 0 ? '+' : '' }}{{ restaurant.growth | number:'1.1-1' }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noRestaurants>
+          <div class="empty-state">
+            <div class="empty-icon">🏪</div>
+            <p>Нет данных о ресторанах</p>
+            <a routerLink="/admin/restaurants" class="empty-action">
+              Добавить ресторан
+            </a>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats-section">
+      <div class="section-header">
+        <h2>Быстрая статистика</h2>
+      </div>
+
+      <div class="quick-stats-grid">
+        <div class="quick-stat">
+          <div class="quick-stat-icon">⏳</div>
+          <div class="quick-stat-content">
+            <div class="quick-stat-value">{{ stats.pendingOrders }}</div>
+            <div class="quick-stat-label">Ожидают обработки</div>
+          </div>
+        </div>
+
+        <div class="quick-stat">
+          <div class="quick-stat-icon">✅</div>
+          <div class="quick-stat-content">
+            <div class="quick-stat-value">{{ getOrdersCompletionRate() | number:'1.0-0' }}%</div>
+            <div class="quick-stat-label">Выполнено заказов</div>
+          </div>
+        </div>
+
+        <div class="quick-stat">
+          <div class="quick-stat-icon">💳</div>
+          <div class="quick-stat-content">
+            <div class="quick-stat-value">{{ formatCurrency(getAverageOrderValue()) }}</div>
+            <div class="quick-stat-label">Средний чек</div>
+          </div>
+        </div>
+
+        <div class="quick-stat">
+          <div class="quick-stat-icon">📊</div>
+          <div class="quick-stat-content">
+            <div class="quick-stat-value">{{ getRestaurantUtilization() | number:'1.0-0' }}%</div>
+            <div class="quick-stat-label">Активные рестораны</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading">
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <h3>Загрузка панели управления...</h3>
+    <p>Получаем актуальные данные</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div class="error-state" *ngIf="error && !loading">
+  <div class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h3>Ошибка загрузки</h3>
+    <p>{{ error }}</p>
+    <div class="error-actions">
+      <button class="retry-btn" (click)="refreshData()">
+        <span class="retry-icon">🔄</span>
+        Попробовать снова
+      </button>
+      <button class="contact-btn">
+        <span class="contact-icon">📞</span>
+        Связаться с поддержкой
+      </button>
+    </div>
+  </div>
+</div>

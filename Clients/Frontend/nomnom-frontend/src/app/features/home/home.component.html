@@ -1,0 +1,81 @@
+<!-- src/app/features/home/home.component.html -->
+
+<app-header (searchPerformed)="searchRestaurants($event)"></app-header>
+
+<main>
+  <!-- Секция рекомендаций (если есть) -->
+  <section class="recommendations-section" *ngIf="hasRecommendations">
+    <div class="container">
+      <h2>Рекомендации для вас</h2>
+      <div class="recommendations-grid">
+        <div class="recommendation-card" *ngFor="let rec of recommendations">
+          <div class="rec-item-info">
+            <h4>{{ rec.itemName }}</h4>
+            <p>{{ rec.restaurantName }}</p>
+            <span class="rec-reason">{{ rec.reason }}</span>
+          </div>
+          <button class="rec-add-button" (click)="addRecommendationToCart(rec)">
+            Добавить
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Основная секция ресторанов с фильтрами -->
+  <section class="restaurants-section">
+    <div class="container">
+      <!-- Фильтры и сортировка -->
+      <div class="filters-container">
+        <div class="category-filters">
+          <h3>Категории</h3>
+          <div class="category-buttons">
+            <button
+              *ngFor="let cuisine of cuisines"
+              class="category-button"
+              [class.active]="selectedCuisine === cuisine"
+              (click)="onCuisineChange(cuisine)">
+              {{ cuisine }}
+            </button>
+          </div>
+        </div>
+
+        <div class="sort-options">
+          <label>Сортировка:</label>
+          <select [(ngModel)]="sortBy" (change)="onSortChange(sortBy)">
+            <option value="rating">По рейтингу</option>
+            <option value="name">По названию</option>
+            <option value="delivery">По времени доставки</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Передаем отфильтрованные рестораны -->
+      <app-restaurants-section [restaurants]="filteredRestaurants"></app-restaurants-section>
+
+      <!-- Сообщение если ничего не найдено -->
+      <div class="no-results" *ngIf="filteredRestaurants.length === 0 && !loading">
+        <h3>Ничего не найдено</h3>
+        <p>Попробуйте изменить критерии поиска или фильтры</p>
+        <button class="reset-filters-btn" (click)="resetFilters()">
+          Сбросить фильтры
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Состояние загрузки -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Загрузка ресторанов...</p>
+  </div>
+
+  <!-- Сообщение об ошибке -->
+  <div class="error-state" *ngIf="error">
+    <h3>Произошла ошибка</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="retryLoad()">
+      Попробовать снова
+    </button>
+  </div>
+</main>

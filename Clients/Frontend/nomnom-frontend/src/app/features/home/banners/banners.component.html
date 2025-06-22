@@ -1,0 +1,9 @@
+<section class="banners">
+  <div class="banner" *ngFor="let banner of banners" [style.background-color]="banner.backgroundColor">
+    <div class="banner-content">
+      <h2>{{ banner.title }}</h2>
+      <p>{{ banner.subtitle }}</p>
+    </div>
+    <img [src]="banner.imageUrl" [alt]="banner.title">
+  </div>
+</section>

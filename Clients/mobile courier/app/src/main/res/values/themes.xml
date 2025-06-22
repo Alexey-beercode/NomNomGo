@@ -1,0 +1,56 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Theme.NomNomGoCourier" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/green_light</item>
+        <item name="colorOnPrimaryContainer">@color/green_dark</item>
+
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/green_container</item>
+
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/green_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Bottom navigation -->
+        <item name="colorSurfaceContainer">@color/white</item>
+    </style>
+
+    <!-- Custom styles for cards -->
+    <style name="CourierCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <!-- Button styles -->
+    <style name="AcceptButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/green_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="InDeliveryButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/orange_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="CompleteButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/blue_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+</resources>

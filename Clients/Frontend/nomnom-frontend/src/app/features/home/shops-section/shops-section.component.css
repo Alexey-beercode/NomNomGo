@@ -1,0 +1,88 @@
+.shops {
+  padding: 16px;
+}
+
+.section-title {
+  padding: 0 0 16px;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.shop-card {
+  background-color: var(--light-gray);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow);
+  height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.shop-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.shop-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin-right: 16px;
+}
+
+.shop-info {
+  flex: 1;
+  padding: 16px 16px 16px 0;
+}
+
+.shop-name {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.shop-delivery-time {
+  color: var(--dark-gray);
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.shop-delivery-time .icon {
+  margin-right: 4px;
+  font-size: 16px;
+}
+
+.shop-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.shop-tag {
+  padding: 4px 8px;
+  background-color: #E8F5E9;
+  color: var(--primary-dark);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.shop-rating {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  padding-right: 16px;
+}
+
+.shop-rating .icon {
+  color: var(--accent-color);
+  margin-right: 4px;
+}
+
+.icon {
+  font-size: 16px;
+  line-height: 1;
+}

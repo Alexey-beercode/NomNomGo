@@ -1,0 +1,57 @@
+.social-login {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.social-title {
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin-bottom: 16px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.social-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.social-button:hover {
+  background-color: var(--light-gray);
+}
+
+.qr-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 100px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.qr-button:hover {
+  background-color: var(--light-gray);
+}
+
+.qr-icon {
+  margin-right: 8px;
+}

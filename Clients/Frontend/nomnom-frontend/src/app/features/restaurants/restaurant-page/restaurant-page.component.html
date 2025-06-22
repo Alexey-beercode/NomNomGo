@@ -1,0 +1,210 @@
+<!-- src/app/features/restaurants/restaurant-page/restaurant-page.component.html -->
+<app-header></app-header>
+
+<div class="restaurant-container" *ngIf="!loading">
+  <!-- Сообщение об ошибке -->
+  <div class="error-message" *ngIf="error">
+    <p>{{ error }}</p>
+    <button (click)="ngOnInit()">Попробовать снова</button>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="content-wrapper" *ngIf="!error">
+    <!-- Левая часть - основной контент -->
+    <div class="main-content">
+      <!-- Кнопка "Назад" -->
+      <div class="back-navigation">
+        <a href="/" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 8H1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 15L1 8L8 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Все рестораны
+        </a>
+      </div>
+
+      <!-- Заголовок ресторана -->
+      <div class="restaurant-header" [style.background-image]="'url(' + getRestaurantImage() + ')'">
+        <div class="restaurant-info" *ngIf="restaurant">
+          <h1>{{ restaurant.name }}</h1>
+
+          <div class="restaurant-meta">
+            <div class="delivery-time">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 5V10L12.5 12.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="10" cy="10" r="9" stroke="white" stroke-width="2"/>
+              </svg>
+              {{ getDeliveryTime() }}
+            </div>
+
+            <div class="rating" *ngIf="getRestaurantRating() > 0">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 1L12.5716 6.59243L18.5 7.52786L14.25 11.9328L15.2717 18L10 15.1924L4.72834 18L5.75 11.9328L1.5 7.52786L7.42835 6.59243L10 1Z" fill="white"/>
+              </svg>
+              {{ getRestaurantRating().toFixed(1) }}
+              <span class="reviews-count" *ngIf="getRestaurantReviewCount() > 0">
+                ({{ getRestaurantReviewCount() }})
+              </span>
+            </div>
+
+            <!-- Статус работы ресторана -->
+            <div class="restaurant-status" [class.closed]="!isRestaurantOpen()">
+              {{ isRestaurantOpen() ? 'Открыт' : 'Закрыт' }}
+            </div>
+
+            <button class="info-button">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="9" stroke="white" stroke-width="2"/>
+                <circle cx="10" cy="6" r="1" fill="white"/>
+                <path d="M10 9V15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Фильтры категорий -->
+      <div class="category-filters">
+        <div class="category-list">
+          <button
+            *ngFor="let category of categories"
+            class="category-button"
+            [class.active]="activeCategory === category"
+            (click)="selectedCategory(category)">
+            {{ category }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Название активной категории -->
+      <h2 class="section-title">{{ activeCategory }}</h2>
+
+      <!-- Сетка меню -->
+      <div class="menu-grid" *ngIf="filteredMenuItems.length > 0">
+        <div *ngFor="let item of filteredMenuItems" class="menu-item">
+          <div class="menu-item-image">
+            <img [src]="getItemImage(item)" [alt]="item.name">
+            <div *ngIf="hasDiscount(item)" class="discount-badge">
+              -{{ getDiscountPercent(item) }}%
+            </div>
+          </div>
+
+          <div class="menu-item-info">
+            <div class="menu-item-price">
+              <span class="current-price">{{ formatPrice(item.price) }}</span>
+              <span *ngIf="hasOldPrice(item)" class="old-price">
+                {{ formatPrice(getOldPrice(item)) }}
+              </span>
+            </div>
+            <h3 class="menu-item-name">{{ item.name }}</h3>
+            <p class="menu-item-description">{{ item.description }}</p>
+
+            <!-- Рейтинг товара -->
+            <div class="item-rating" *ngIf="item.averageRating > 0">
+              <span class="rating-stars">★</span>
+              <span class="rating-value">{{ item.averageRating.toFixed(1) }}</span>
+              <span class="rating-count" *ngIf="item.reviewCount > 0">
+                ({{ item.reviewCount }})
+              </span>
+            </div>
+
+            <!-- Кнопка добавления в корзину -->
+            <button
+              class="add-to-cart-btn"
+              [disabled]="!item.isAvailable || !isRestaurantOpen()"
+              (click)="addToCart(item)">
+              <span *ngIf="item.isAvailable && isRestaurantOpen()">Добавить в корзину</span>
+              <span *ngIf="!item.isAvailable">Нет в наличии</span>
+              <span *ngIf="!isRestaurantOpen()">Ресторан закрыт</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пустое состояние -->
+      <div class="empty-menu" *ngIf="filteredMenuItems.length === 0 && !loading">
+        <p>В этой категории пока нет блюд</p>
+      </div>
+    </div>
+
+    <!-- Правая боковая панель - корзина -->
+    <div class="cart-sidebar">
+      <div class="cart-sticky">
+        <h2>Корзина</h2>
+
+        <!-- Пустая корзина -->
+        <div class="empty-cart" *ngIf="!hasItemsInCart">
+          <div class="empty-cart-image">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M65 23.3333H15C13.1591 23.3333 11.6667 24.8257 11.6667 26.6667V66.6667C11.6667 68.5076 13.1591 70 15 70H65C66.8409 70 68.3333 68.5076 68.3333 66.6667V26.6667C68.3333 24.8257 66.8409 23.3333 65 23.3333Z" stroke="#CCCCCC" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M26.6667 23.3333V16.6667C26.6667 14.8986 27.3691 13.2029 28.6193 11.9526C29.8696 10.7024 31.5652 10 33.3333 10H46.6667C48.4348 10 50.1304 10.7024 51.3807 11.9526C52.6309 13.2029 53.3333 14.8986 53.3333 16.6667V23.3333" stroke="#CCCCCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="empty-cart-text">В вашей корзине<br>пока пусто</p>
+        </div>
+
+        <!-- Корзина с товарами -->
+        <div class="cart-content" *ngIf="hasItemsInCart">
+          <!-- Список товаров в корзине -->
+          <div class="cart-items-list">
+            <div class="cart-item" *ngFor="let item of cartItems">
+              <div class="cart-item-image">
+                <img [src]="getItemImage(item)" [alt]="item.name">
+              </div>
+              <div class="cart-item-details">
+                <div class="cart-item-name">{{ item.name }}</div>
+                <div class="cart-item-price">{{ formatPrice(item.price) }}</div>
+              </div>
+              <div class="cart-item-quantity">
+                <button class="quantity-btn" (click)="decrementQuantity(item)">−</button>
+                <span class="quantity-value">{{ item.quantity }}</span>
+                <button class="quantity-btn" (click)="incrementQuantity(item)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Итого -->
+          <div class="cart-summary">
+            <div class="cart-total-row">
+              <span>Товары ({{ cartItemCount }})</span>
+              <span>{{ formatPrice(cartTotal) }}</span>
+            </div>
+            <div class="cart-total-row">
+              <span>Доставка</span>
+              <span>0 ₽</span>
+            </div>
+            <div class="cart-total-row total">
+              <span>Итого</span>
+              <span>{{ formatPrice(cartTotal) }}</span>
+            </div>
+          </div>
+
+          <!-- Кнопка оформления заказа -->
+          <button class="checkout-btn" (click)="proceedToCheckout()">
+            Оформить заказ
+          </button>
+        </div>
+
+        <!-- Информация о доставке -->
+        <div class="delivery-info">
+          <div class="delivery-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 4L19 10L13 16" stroke="#CCCCCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19 10H1" stroke="#CCCCCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="delivery-details">
+            <div class="delivery-title">Доставка 0–99 ₽ · {{ getDeliveryTime() }}</div>
+            <a href="#" class="delivery-link">Подробные условия</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Состояние загрузки -->
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Загрузка меню...</p>
+</div>

@@ -1,0 +1,342 @@
+<!-- src/app/features/admin/users/admin-users.component.html -->
+
+<div class="admin-users">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Управление пользователями</h1>
+      <p class="page-description">Просматривайте и управляйте пользователями системы</p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary"
+        (click)="refreshData()"
+        [disabled]="loading">
+        <span *ngIf="loading">🔄</span>
+        <span *ngIf="!loading">↻</span>
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+    <button class="alert-close" (click)="error = ''">×</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-container">
+      <app-input
+        placeholder="Поиск по имени, email или телефону..."
+        [value]="filters.search || ''"
+        (valueChange)="onSearchChange($event)">
+      </app-input>
+    </div>
+
+    <div class="filters-container">
+      <div class="filter-group">
+        <label class="filter-label">Роль:</label>
+        <select class="filter-select" [(ngModel)]="filters.role" (change)="onFilterChange()">
+          <option [ngValue]="undefined">Все роли</option>
+          <option value="USER">Пользователи</option>
+          <option value="ADMIN">Администраторы</option>
+          <option value="MANAGER">Менеджеры</option>
+          <option value="COURIER">Курьеры</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Статус:</label>
+        <select class="filter-select" [(ngModel)]="filters.isBlocked" (change)="onFilterChange()">
+          <option [ngValue]="undefined">Все</option>
+          <option [ngValue]="false">Активные</option>
+          <option [ngValue]="true">Заблокированные</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Сортировка:</label>
+        <select class="filter-select" [(ngModel)]="filters.sortBy" (change)="onFilterChange()">
+          <option value="username">По имени</option>
+          <option value="email">По email</option>
+          <option value="createdAt">По дате регистрации</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Порядок:</label>
+        <select class="filter-select" [(ngModel)]="filters.sortOrder" (change)="onFilterChange()">
+          <option value="desc">По убыванию</option>
+          <option value="asc">По возрастанию</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-secondary" (click)="clearFilters()">
+          Очистить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Stats -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getTotalUsers() }}</div>
+          <div class="stat-label">Всего пользователей</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getActiveUsers() }}</div>
+          <div class="stat-label">Активных</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚫</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getBlockedUsers() }}</div>
+          <div class="stat-label">Заблокированных</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👑</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getAdminUsers() }}</div>
+          <div class="stat-label">Администраторов</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Загружаем пользователей...</p>
+  </div>
+
+  <!-- Content -->
+  <div class="content-section" *ngIf="!loading">
+    <!-- Table View -->
+    <div class="table-container" *ngIf="filteredUsers.length > 0">
+      <table class="users-table">
+        <thead>
+        <tr>
+          <th class="sortable" (click)="onSortChange('username')">
+            Пользователь
+            <span class="sort-indicator">{{ getSortIcon('username') }}</span>
+          </th>
+          <th class="sortable" (click)="onSortChange('email')">
+            Email
+            <span class="sort-indicator">{{ getSortIcon('email') }}</span>
+          </th>
+          <th>Телефон</th>
+          <th>Роли</th>
+          <th>Статус</th>
+          <th class="sortable" (click)="onSortChange('createdAt')">
+            Регистрация
+            <span class="sort-indicator">{{ getSortIcon('createdAt') }}</span>
+          </th>
+          <th class="actions-col">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let user of filteredUsers; trackBy: trackUser"
+            [class.blocked-user]="user.isBlocked">
+          <td class="user-info">
+            <div class="user-avatar">
+              {{ getUserInitials(user.username) }}
+            </div>
+            <div class="user-details">
+              <div class="username">{{ user.username }}</div>
+              <div class="user-id">ID: {{ user.userId.substring(0, 8) }}...</div>
+            </div>
+          </td>
+
+          <td class="email-cell">{{ user.email }}</td>
+
+          <td class="phone-cell">{{ user.phoneNumber || 'Не указан' }}</td>
+
+          <td class="roles">
+              <span *ngFor="let role of user.roles"
+                    class="role-badge"
+                    [class]="getRoleClass(role)">
+                {{ getRoleDisplayName(role) }}
+              </span>
+          </td>
+
+          <td class="status">
+              <span class="status-badge" [class]="getStatusClass(user.isBlocked)">
+                {{ getStatusText(user.isBlocked) }}
+              </span>
+            <div *ngIf="user.isBlocked && user.blockedUntil" class="blocked-until">
+              до {{ formatDate(user.blockedUntil) }}
+            </div>
+          </td>
+
+          <td class="registration">
+            <div class="reg-date">{{ formatDate(user.createdAt) }}</div>
+          </td>
+
+          <td class="actions">
+            <div class="action-buttons">
+              <button class="action-btn view"
+                      (click)="openViewModal(user)"
+                      title="Просмотр">
+                👁️
+              </button>
+              <button class="action-btn block"
+                      (click)="openBlockModal(user)"
+                      [title]="user.isBlocked ? 'Разблокировать' : 'Заблокировать'">
+                {{ user.isBlocked ? '🔓' : '🔒' }}
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredUsers.length === 0">
+      <div class="empty-icon">👥</div>
+      <h3>Пользователи не найдены</h3>
+      <p>Попробуйте изменить фильтры поиска</p>
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        Сбросить фильтры
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="modalState.isOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modalState.title }}</h2>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
+    <!-- User Details Modal -->
+    <div class="modal-body" *ngIf="modalState.type === 'view' && modalState.data">
+      <div class="user-details-modal">
+        <div class="detail-section">
+          <h3>Основная информация</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Имя пользователя:</label>
+              <span>{{ modalState.data.username }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Email:</label>
+              <span>{{ modalState.data.email }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Телефон:</label>
+              <span>{{ modalState.data.phoneNumber || 'Не указан' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>ID пользователя:</label>
+              <span class="user-id-full">{{ modalState.data.userId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Роли и статус</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Роли:</label>
+              <div class="roles-list">
+                <span *ngFor="let role of modalState.data.roles"
+                      class="role-badge"
+                      [class]="getRoleClass(role)">
+                  {{ getRoleDisplayName(role) }}
+                </span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <label>Статус:</label>
+              <span class="status-badge" [class]="getStatusClass(modalState.data.isBlocked)">
+                {{ getStatusText(modalState.data.isBlocked) }}
+              </span>
+            </div>
+            <div class="detail-item" *ngIf="modalState.data.isBlocked && modalState.data.blockedUntil">
+              <label>Блокировка до:</label>
+              <span>{{ formatDate(modalState.data.blockedUntil) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Даты</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Регистрация:</label>
+              <span>{{ formatDateTime(modalState.data.createdAt) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Обновление:</label>
+              <span>{{ formatDateTime(modalState.data.updatedAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block User Modal -->
+    <div class="modal-body" *ngIf="modalState.type === 'block' && modalState.data">
+      <div class="block-form">
+        <div class="warning-icon">🔒</div>
+        <p>
+          Вы собираетесь заблокировать пользователя
+          <strong>{{ modalState.data.username }}</strong>
+        </p>
+
+        <div class="form-group">
+          <label for="blockDuration">Продолжительность блокировки:</label>
+          <select id="blockDuration" [(ngModel)]="blockForm.duration" class="form-select">
+            <option *ngFor="let duration of availableDurations" [value]="duration.value">
+              {{ duration.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unblock User Modal -->
+    <div class="modal-body" *ngIf="modalState.type === 'unblock' && modalState.data">
+      <div class="unblock-confirmation">
+        <div class="warning-icon">🔓</div>
+        <p>
+          Вы уверены, что хотите разблокировать пользователя
+          <strong>{{ modalState.data.username }}</strong>?
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Отмена
+      </button>
+
+      <button *ngIf="modalState.type === 'block'"
+              class="btn btn-warning"
+              (click)="blockUser()">
+        Заблокировать на {{ getDurationDisplayName(blockForm.duration) }}
+      </button>
+
+      <button *ngIf="modalState.type === 'unblock'"
+              class="btn btn-primary"
+              (click)="unblockUser()">
+        Разблокировать
+      </button>
+    </div>
+  </div>
+</div>

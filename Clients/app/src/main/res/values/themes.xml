@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.NomNomGoCourier" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/green_light</item>
+        <item name="colorOnPrimaryContainer">@color/green_dark</item>
+        <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/green_accent</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="android:statusBarColor">@color/green_primary</item>
+    </style>
+</resources>

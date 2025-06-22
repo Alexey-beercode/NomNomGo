@@ -1,0 +1,75 @@
+<!-- src/app/features/admin/layout/admin-layout.component.html -->
+
+<div class="admin-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <h2 *ngIf="!sidebarCollapsed">🍕 NomNomGo</h2>
+        <span class="logo-mini" *ngIf="sidebarCollapsed">🍕</span>
+        <span class="admin-badge" *ngIf="!sidebarCollapsed">Admin</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li class="nav-item" *ngFor="let item of filteredMenuItems">
+          <a [routerLink]="item.route"
+             [class]="getMenuItemClass(item)"
+             [title]="sidebarCollapsed ? item.label : ''">
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-text" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ getUserInitial() }}</div>
+        <div class="user-details" *ngIf="!sidebarCollapsed">
+          <div class="user-name">{{ getUserDisplayName() }}</div>
+          <div class="user-role">{{ getUserRole() }}</div>
+        </div>
+      </div>
+
+      <button class="logout-btn"
+              (click)="logout()"
+              [title]="sidebarCollapsed ? 'Выйти' : ''">
+        <span class="logout-icon">🚪</span>
+        <span class="logout-text" *ngIf="!sidebarCollapsed">Выйти</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" (click)="toggleSidebar()">
+          <span class="toggle-icon">{{ sidebarCollapsed ? '→' : '←' }}</span>
+        </button>
+        <h1 class="page-title">{{ getCurrentPageTitle() }}</h1>
+      </div>
+
+      <div class="header-right">
+        <!-- User Profile -->
+        <div class="user-profile">
+          <div class="profile-avatar">{{ getUserInitial() }}</div>
+          <span class="profile-name">{{ getUserDisplayName() }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="admin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay"
+     *ngIf="!sidebarCollapsed"
+     (click)="toggleSidebar()"></div>

@@ -1,0 +1,429 @@
+<!-- src/app/features/admin/reviews/admin-reviews.component.html -->
+
+<div class="admin-reviews">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Управление отзывами</h1>
+      <p class="page-description">Просматривайте и модерируйте отзывы пользователей</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="refreshData()">
+        <span class="btn-icon">🔄</span>
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-container">
+      <app-input
+        placeholder="Поиск по тексту отзыва или имени пользователя..."
+        [value]="filters.search || ''"
+        (valueChange)="onSearchChange($event)">
+      </app-input>
+    </div>
+
+    <div class="filters-container">
+      <div class="filter-group">
+        <label class="filter-label">Тип:</label>
+        <select class="filter-select" [(ngModel)]="filters.targetType" (change)="onFilterChange()">
+          <option [ngValue]="undefined">Все типы</option>
+          <option value="Restaurant">Рестораны</option>
+          <option value="MenuItem">Блюда</option>
+          <option value="Courier">Курьеры</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Рейтинг:</label>
+        <select class="filter-select" [(ngModel)]="filters.rating" (change)="onFilterChange()">
+          <option [ngValue]="undefined">Все рейтинги</option>
+          <option [ngValue]="5">⭐⭐⭐⭐⭐ (5)</option>
+          <option [ngValue]="4">⭐⭐⭐⭐ (4)</option>
+          <option [ngValue]="3">⭐⭐⭐ (3)</option>
+          <option [ngValue]="2">⭐⭐ (2)</option>
+          <option [ngValue]="1">⭐ (1)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Статус:</label>
+        <select class="filter-select" [(ngModel)]="filters.isHidden" (change)="onFilterChange()">
+          <option [ngValue]="undefined">Все отзывы</option>
+          <option [ngValue]="false">Опубликованные</option>
+          <option [ngValue]="true">Скрытые</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Дата от:</label>
+        <input type="date" class="filter-select" [(ngModel)]="filters.dateFrom" (change)="onFilterChange()">
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Дата до:</label>
+        <input type="date" class="filter-select" [(ngModel)]="filters.dateTo" (change)="onFilterChange()">
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Сортировка:</label>
+        <select class="filter-select" [(ngModel)]="filters.sortBy" (change)="onFilterChange()">
+          <option value="createdAt">По дате</option>
+          <option value="rating">По рейтингу</option>
+          <option value="userName">По пользователю</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Порядок:</label>
+        <select class="filter-select" [(ngModel)]="filters.sortOrder" (change)="onFilterChange()">
+          <option value="desc">По убыванию</option>
+          <option value="asc">По возрастанию</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Stats -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getTotalReviews() }}</div>
+          <div class="stat-label">Всего отзывов</div>
+        </div>
+      </div>
+      <div class="stat-card positive">
+        <div class="stat-icon">👍</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getPositiveReviews() }}</div>
+          <div class="stat-label">Положительные (4-5⭐)</div>
+        </div>
+      </div>
+      <div class="stat-card negative">
+        <div class="stat-icon">👎</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getNegativeReviews() }}</div>
+          <div class="stat-label">Отрицательные (1-2⭐)</div>
+        </div>
+      </div>
+      <div class="stat-card average">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getAverageRating() }}</div>
+          <div class="stat-label">Средний рейтинг</div>
+        </div>
+      </div>
+      <div class="stat-card hidden">
+        <div class="stat-icon">👁️‍🗨️</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getHiddenReviews() }}</div>
+          <div class="stat-label">Скрытые отзывы</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Загружаем отзывы...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="error && !loading">
+    <div class="error-message">
+      <span class="error-icon">⚠️</span>
+      {{ error }}
+    </div>
+    <button class="btn btn-secondary" (click)="refreshData()">Попробовать снова</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-section" *ngIf="!loading && !error">
+    <!-- Reviews Grid -->
+    <div class="reviews-grid" *ngIf="filteredReviews.length > 0">
+      <div *ngFor="let review of filteredReviews; trackBy: trackReview"
+           class="review-card"
+           [class.hidden-review]="review.isHidden">
+
+        <!-- Review Header -->
+        <div class="review-header">
+          <div class="user-info">
+            <div class="user-avatar">
+              {{ getUserInitials(review.userName) }}
+            </div>
+            <div class="user-details">
+              <div class="user-name">{{ review.userName }}</div>
+              <div class="review-date">{{ formatDateTime(review.createdAt) }}</div>
+            </div>
+          </div>
+          <div class="review-rating">
+            <div class="stars">
+              <span *ngFor="let star of getStarsArray(review.rating)"
+                    [class]="star ? 'star filled' : 'star empty'">⭐</span>
+            </div>
+            <span class="rating-number">({{ review.rating }})</span>
+          </div>
+        </div>
+
+        <!-- Target Info -->
+        <div class="target-info">
+          <div class="target-type">
+            <span class="type-badge" [class]="getTargetTypeClass(review.targetType)">
+              {{ getTargetTypeText(review.targetType) }}
+            </span>
+          </div>
+          <div class="target-name">{{ review.targetName }}</div>
+        </div>
+
+        <!-- Review Content -->
+        <div class="review-content">
+          <div class="review-text" [class.expanded]="review.expanded">
+            {{ review.comment }}
+          </div>
+          <button *ngIf="review.comment && review.comment.length > 200"
+                  class="expand-btn"
+                  (click)="toggleReviewExpansion(review)">
+            {{ review.expanded ? 'Свернуть' : 'Показать полностью' }}
+          </button>
+        </div>
+
+        <!-- Sentiment Analysis (если есть) -->
+        <div class="sentiment-analysis" *ngIf="review.sentiment">
+          <span class="sentiment-badge" [class]="getSentimentClass(review.sentiment)">
+            {{ getSentimentText(review.sentiment) }}
+          </span>
+        </div>
+
+        <!-- Review Status -->
+        <div class="review-status" *ngIf="review.isHidden">
+          <span class="status-badge hidden">Скрыт</span>
+          <div class="hidden-reason" *ngIf="review.hiddenReason">
+            Причина: {{ review.hiddenReason }}
+          </div>
+        </div>
+
+        <!-- Review Actions -->
+        <div class="review-actions">
+          <button class="action-btn view"
+                  (click)="openViewModal(review)"
+                  title="Подробная информация">
+            👁️
+          </button>
+          <button class="action-btn hide"
+                  (click)="toggleReviewVisibility(review)"
+                  [title]="review.isHidden ? 'Показать отзыв' : 'Скрыть отзыв'">
+            {{ review.isHidden ? '👁️' : '🙈' }}
+          </button>
+          <button class="action-btn delete"
+                  (click)="openDeleteModal(review)"
+                  title="Удалить отзыв">
+            🗑️
+          </button>
+          <button class="action-btn report"
+                  (click)="openReportModal(review)"
+                  title="Пожаловаться">
+            🚩
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredReviews.length === 0">
+      <div class="empty-icon">💬</div>
+      <h3>Отзывы не найдены</h3>
+      <p>Попробуйте изменить фильтры поиска</p>
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        Сбросить фильтры
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="modalState.isOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modalState.title }}</h2>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
+    <!-- Review Details Modal -->
+    <div class="modal-body" *ngIf="modalState.type === 'view' && modalState.data">
+      <div class="review-details-modal">
+        <div class="detail-section">
+          <h3>Информация о пользователе</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Пользователь:</label>
+              <span>{{ modalState.data.userName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>ID пользователя:</label>
+              <span>{{ modalState.data.userId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Дата отзыва:</label>
+              <span>{{ formatDateTime(modalState.data.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Объект отзыва</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Тип:</label>
+              <span class="type-badge" [class]="getTargetTypeClass(modalState.data.targetType)">
+                {{ getTargetTypeText(modalState.data.targetType) }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <label>Название:</label>
+              <span>{{ modalState.data.targetName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>ID объекта:</label>
+              <span>{{ modalState.data.targetId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Оценка и комментарий</h3>
+          <div class="rating-display">
+            <div class="stars-large">
+              <span *ngFor="let star of getStarsArray(modalState.data.rating)"
+                    [class]="star ? 'star filled' : 'star empty'">⭐</span>
+            </div>
+            <span class="rating-text">{{ modalState.data.rating }} из 5</span>
+          </div>
+          <div class="comment-display" *ngIf="modalState.data.comment">
+            <label>Комментарий:</label>
+            <div class="comment-text">{{ modalState.data.comment }}</div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="modalState.data.sentiment">
+          <h3>Анализ тональности</h3>
+          <div class="sentiment-display">
+            <span class="sentiment-badge large" [class]="getSentimentClass(modalState.data.sentiment)">
+              {{ getSentimentText(modalState.data.sentiment) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="modalState.data.isHidden">
+          <h3>Статус модерации</h3>
+          <div class="moderation-info">
+            <span class="status-badge hidden">Отзыв скрыт</span>
+            <div class="hidden-reason" *ngIf="modalState.data.hiddenReason">
+              <label>Причина:</label>
+              <span>{{ modalState.data.hiddenReason }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hide/Show Confirmation -->
+    <div class="modal-body" *ngIf="modalState.type === 'hide' || modalState.type === 'show'">
+      <div class="action-confirmation">
+        <div class="warning-icon">{{ modalState.type === 'hide' ? '🙈' : '👁️' }}</div>
+        <p>
+          Вы уверены, что хотите {{ modalState.type === 'hide' ? 'скрыть' : 'показать' }} этот отзыв?
+        </p>
+        <div class="form-group" *ngIf="modalState.type === 'hide'">
+          <label for="hideReason">Причина скрытия:</label>
+          <textarea id="hideReason"
+                    class="form-textarea"
+                    [(ngModel)]="hideReason"
+                    placeholder="Укажите причину скрытия отзыва..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div class="modal-body" *ngIf="modalState.type === 'delete'">
+      <div class="delete-confirmation">
+        <div class="warning-icon">🗑️</div>
+        <p>
+          Вы уверены, что хотите <strong>удалить</strong> этот отзыв?
+        </p>
+        <p class="warning-text">
+          Это действие нельзя будет отменить. Отзыв будет удален навсегда.
+        </p>
+        <div class="form-group">
+          <label for="deleteReason">Причина удаления:</label>
+          <textarea id="deleteReason"
+                    class="form-textarea"
+                    [(ngModel)]="deleteReason"
+                    placeholder="Укажите причину удаления отзыва..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-body" *ngIf="modalState.type === 'report'">
+      <div class="report-form">
+        <h4>Пожаловаться на отзыв</h4>
+        <div class="form-group">
+          <label for="reportReason">Причина жалобы:</label>
+          <select id="reportReason" class="form-select" [(ngModel)]="reportReason">
+            <option value="">Выберите причину</option>
+            <option value="spam">Спам</option>
+            <option value="inappropriate">Неподходящий контент</option>
+            <option value="fake">Поддельный отзыв</option>
+            <option value="offensive">Оскорбительный язык</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="reportComment">Дополнительные комментарии:</label>
+          <textarea id="reportComment"
+                    class="form-textarea"
+                    [(ngModel)]="reportComment"
+                    placeholder="Опишите проблему подробнее..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Отмена
+      </button>
+
+      <button *ngIf="modalState.type === 'hide'"
+              class="btn btn-warning"
+              [disabled]="!hideReason?.trim()"
+              (click)="confirmHideReview()">
+        Скрыть отзыв
+      </button>
+
+      <button *ngIf="modalState.type === 'show'"
+              class="btn btn-primary"
+              (click)="confirmShowReview()">
+        Показать отзыв
+      </button>
+
+      <button *ngIf="modalState.type === 'delete'"
+              class="btn btn-danger"
+              [disabled]="!deleteReason?.trim()"
+              (click)="confirmDeleteReview()">
+        Удалить отзыв
+      </button>
+
+      <button *ngIf="modalState.type === 'report'"
+              class="btn btn-warning"
+              [disabled]="!reportReason"
+              (click)="confirmReportReview()">
+        Отправить жалобу
+      </button>
+    </div>
+  </div>
+</div>

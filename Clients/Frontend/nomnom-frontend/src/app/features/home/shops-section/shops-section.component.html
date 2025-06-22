@@ -1,0 +1,21 @@
+<section class="shops">
+  <h2 class="section-title">Магазины</h2>
+
+  <div class="shop-card" *ngFor="let shop of shops">
+    <img [src]="shop.imageUrl" [alt]="shop.name" class="shop-logo">
+    <div class="shop-info">
+      <h3 class="shop-name">{{ shop.name }}</h3>
+      <div class="shop-delivery-time">
+        <span class="icon">🕒</span>
+        <span>{{ shop.deliveryTime }}</span>
+      </div>
+      <div class="shop-tags">
+        <span class="shop-tag" *ngFor="let tag of shop.tags">{{ tag }}</span>
+      </div>
+    </div>
+    <div class="shop-rating">
+      <span class="icon">★</span>
+      <span>{{ shop.rating }}</span>
+    </div>
+  </div>
+</section>

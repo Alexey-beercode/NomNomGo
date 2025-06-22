@@ -1,0 +1,33 @@
+<section class="restaurants">
+  <h2 class="section-title">Рестораны</h2>
+
+  <div class="filter-sort">
+    <button class="delivery-filter">
+      Доставка: Сейчас
+      <span class="icon">▼</span>
+    </button>
+
+    <button class="sort-button">
+      Сортировка
+      <span class="icon">⇅</span>
+    </button>
+  </div>
+
+  <div class="category-filter">
+    <button
+      *ngFor="let category of categories"
+      class="category-button"
+      [class.active]="selectedCategory === category"
+      (click)="selectCategory(category)">
+      {{ category }}
+    </button>
+    <button class="category-button">Ещё</button>
+  </div>
+
+  <div class="restaurant-grid">
+    <app-restaurant-card
+      *ngFor="let restaurant of restaurants"
+      [restaurant]="restaurant">
+    </app-restaurant-card>
+  </div>
+</section>

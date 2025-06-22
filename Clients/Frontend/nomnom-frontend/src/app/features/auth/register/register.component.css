@@ -1,0 +1,336 @@
+/* src/app/features/auth/register/register.component.css */
+
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?q=80&w=2667&auto=format');
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+}
+
+.register-container {
+  background-color: white;
+  width: 100%;
+  max-width: 460px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.back-button {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f5f5f5;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary-color, #2ecc71);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo img {
+  height: 30px;
+  margin-right: 8px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 16px;
+  text-align: center;
+  color: var(--dark-gray, #757575);
+  margin-bottom: 32px;
+  line-height: 1.4;
+}
+
+/* Form Fields */
+.form-field {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  background-color: #fafafa;
+}
+
+.form-field input:focus {
+  border-color: var(--primary-color, #2ecc71);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+}
+
+.form-field input.invalid {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.form-field.error input {
+  border-color: #dc3545;
+}
+
+/* Phone Field */
+.phone-field {
+  display: flex;
+  margin-bottom: 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+}
+
+.phone-field:focus-within {
+  border-color: var(--primary-color, #2ecc71);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+}
+
+.phone-field.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.country-code {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: transparent;
+  border-right: 1px solid #e0e0e0;
+  font-weight: 500;
+  color: #333;
+}
+
+.phone-field input {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  background-color: transparent;
+  font-size: 16px;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Error Messages */
+.field-error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 6px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-error::before {
+  content: '⚠️';
+  font-size: 12px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #fff5f5;
+  border: 1px solid #f8d7da;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #721c24;
+}
+
+.error-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.error-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  padding: 16px;
+  background-color: #333333;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #111111;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Links */
+.login-link {
+  display: block;
+  text-align: center;
+  color: var(--primary-color, #2ecc71);
+  margin-bottom: 48px;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.login-link:hover {
+  color: var(--primary-dark, #27ae60);
+  text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+}
+
+.footer-text {
+  color: var(--dark-gray, #757575);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  :host {
+    padding: 10px;
+  }
+
+  .register-container {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+
+  .form-field input,
+  .phone-field input {
+    padding: 14px 16px;
+    font-size: 16px; /* Предотвращает зум на iOS */
+  }
+
+  .country-code {
+    padding: 14px 12px;
+  }
+
+  .submit-button {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .form-field input,
+  .phone-field {
+    border-width: 3px;
+  }
+
+  .submit-button {
+    border: 2px solid #000;
+  }
+}
+
+/* Focus styles for accessibility */
+.submit-button:focus,
+.login-link:focus,
+.back-button:focus {
+  outline: 2px solid var(--primary-color, #2ecc71);
+  outline-offset: 2px;
+}

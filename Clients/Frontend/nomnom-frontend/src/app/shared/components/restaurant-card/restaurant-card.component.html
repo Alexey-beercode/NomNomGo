@@ -1,0 +1,76 @@
+<!-- src/app/shared/components/restaurant-card/restaurant-card.component.html -->
+<div class="restaurant-card" *ngIf="restaurant" [routerLink]="['/restaurant', restaurant.id]">
+  <div class="restaurant-image-container">
+    <img
+      [src]="getRestaurantImage()"
+      [alt]="restaurant.name"
+      class="restaurant-image"
+      (error)="onImageError($event)"
+      loading="lazy">
+
+    <!-- Статус ресторана -->
+    <div class="restaurant-status-badge" *ngIf="!restaurant.isActive">
+      Закрыто
+    </div>
+
+    <!-- Кнопка закладок -->
+    <button class="bookmark-button" (click)="$event.stopPropagation()">
+      <span class="icon">♡</span>
+    </button>
+  </div>
+
+  <div class="restaurant-info">
+    <!-- Название и рейтинг -->
+    <div class="restaurant-header">
+      <h3 class="restaurant-name">{{ restaurant.name }}</h3>
+      <div class="restaurant-rating" *ngIf="restaurant.averageRating > 0">
+        <app-rating [rating]="restaurant.averageRating"></app-rating>
+        <span class="rating-text">{{ restaurant.averageRating.toFixed(1) }}</span>
+        <span class="reviews-count" *ngIf="restaurant.reviewCount > 0">
+          ({{ restaurant.reviewCount }})
+        </span>
+      </div>
+    </div>
+
+    <!-- Тип кухни -->
+    <div class="restaurant-cuisine">
+      {{ getCuisineType() }}
+    </div>
+
+    <!-- Время доставки и стоимость -->
+    <div class="restaurant-delivery-info">
+      <div class="delivery-time">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        {{ getDeliveryTime() }}
+      </div>
+
+      <div class="delivery-cost">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M13 10.5v1.167c0 .736-.597 1.333-1.333 1.333H10.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M5.5 13H4.333C3.597 13 3 12.403 3 11.667V10.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M13 5.5V4.333C13 3.597 12.403 3 11.667 3H10.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M5.5 3H4.333C3.597 3 3 3.597 3 4.333V5.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 8h3" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        {{ getDeliveryFee() }}
+      </div>
+    </div>
+
+    <!-- Адрес ресторана -->
+    <div class="restaurant-address">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1.167C4.699 1.167 2.833 3.032 2.833 5.333c0 3.5 4.167 7.5 4.167 7.5s4.167-4 4.167-7.5c0-2.301-1.866-4.166-4.167-4.166z" stroke="currentColor" stroke-width="1.167"/>
+        <circle cx="7" cy="5.333" r="1.167" stroke="currentColor" stroke-width="1.167"/>
+      </svg>
+      {{ restaurant.address }}
+    </div>
+
+    <!-- Дополнительные теги/особенности -->
+    <div class="restaurant-tags" *ngIf="getRestaurantTags().length > 0">
+      <span class="tag" *ngFor="let tag of getRestaurantTags()">{{ tag }}</span>
+    </div>
+  </div>
+</div>

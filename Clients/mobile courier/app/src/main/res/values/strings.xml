@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">NomNomGo Курьер</string>
+    <string name="status_online">Онлайн</string>
+    <string name="status_offline">Офлайн</string>
+    <string name="connection_testing">Проверка подключения...</string>
+    <string name="connection_success">Подключен к серверу ✓</string>
+    <string name="connection_error">Ошибка подключения ✗</string>
+    <string name="location_permission_required">Необходимо разрешение на использование местоположения</string>
+    <string name="location_tracking_started">Отслеживание местоположения включено</string>
+    <string name="location_tracking_stopped">Отслеживание местоположения выключено</string>
+    <string name="order_accepted">Заказ принят</string>
+    <string name="delivery_started">Доставка начата</string>
+    <string name="delivery_completed">Заказ доставлен</string>
+    <string name="data_refreshed">Данные обновлены</string>
+    <string name="no_active_orders">Нет активных заказов</string>
+</resources>

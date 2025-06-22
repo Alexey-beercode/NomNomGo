@@ -1,0 +1,246 @@
+services:
+
+  # ===== IDENTITY SERVICE =====
+  # ===== IDENTITY SERVICE =====
+  # ===== IDENTITY SERVICE =====
+  identity-service:
+    build:
+      context: ./src/Services/
+      dockerfile: IdentityService/NomNomGo.IdentityService.API/Dockerfile
+    ports:
+      - "5200:5200"  # Убираем IP привязку, чтобы работало на localhost
+    environment:
+      - ASPNETCORE_URLS=http://+:5200
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__IdentityServiceConnection=Host=identity-db;Port=5432;Database=nomnom_identity;Username=postgres;Password=NOMNOM123
+      - ConnectionStrings__DefaultConnection=Host=identity-db;Port=5432;Database=nomnom_identity;Username=postgres;Password=NOMNOM123
+      - JwtSettings__SecretKey=NomNomGoSuperSecretKeyForJWTTokenGeneration2024!
+      - JwtSettings__Issuer=NomNomGo.IdentityService
+      - JwtSettings__Audience=NomNomGo.Clients
+      - JwtSettings__ExpirationInMinutes=60
+      # Отключаем HTTPS redirect в Development
+      - ASPNETCORE_HTTPS_PORT=
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=
+    depends_on:
+      - identity-db
+      - redis
+    networks:
+      nomnom-network:
+
+  # ===== MENU & ORDER SERVICE =====
+  menu-order-service:
+    build:
+      context: ./src/Services/
+      dockerfile: MenuOrderService/NomNomGo.MenuOrderService.API/Dockerfile
+    ports:
+      - "5202:5202"
+    environment:
+      - ASPNETCORE_URLS=http://+:5202
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=menu-order-db;Port=5432;Database=nomnom_menu_orders;Username=postgres;Password=NOMNOM123
+      # ИСПРАВЛЕННЫЕ URL для Docker сети
+      - Services__RecommendationService=http://recommendation-review-service:5201
+      - Services__IdentityService=http://identity-service:5200
+      - Services__EmailService=http://email-service:5204
+      - RabbitMQ__Hostname=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      # Настройки CORS
+      - Cors__AllowedOrigins__0=http://localhost:4200
+      - Cors__AllowedOrigins__1=https://localhost:4200
+      - Cors__AllowedOrigins__2=http://127.0.0.1:4200
+      - Cors__AllowedOrigins__3=http://host.docker.internal:4200
+      # Дополнительные настройки для HTTP клиентов
+      - HttpClient__Timeout=00:00:30
+      - HttpClient__RetryCount=3
+    depends_on:
+      - menu-order-db
+      - recommendation-review-service
+      - rabbitmq
+      - redis
+    networks:
+      nomnom-network:
+
+  # ===== RECOMMENDATION & REVIEW SERVICE =====
+  recommendation-review-service:
+    build:
+      context: ./src/Services/
+      dockerfile: RecommendationService/RecommendationService.API/Dockerfile
+    ports:
+      - "5201:5201"
+    environment:
+      - ASPNETCORE_URLS=http://+:5201
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=recommendation-db;Port=5432;Database=nomnom_recommendations;Username=postgres;Password=NOMNOM123
+      # ИСПРАВЛЕННЫЕ URL для Docker сети
+      - Services__MenuOrderService=http://menu-order-service:5202
+      - Services__IdentityService=http://identity-service:5200
+      - ML__TrainingSchedule=0 2 * * *
+      # Настройки CORS для фронтенда
+      - Cors__AllowedOrigins__0=http://localhost:4200
+      - Cors__AllowedOrigins__1=https://localhost:4200
+      - Cors__AllowedOrigins__2=http://127.0.0.1:4200
+      - Cors__AllowedOrigins__3=http://host.docker.internal:4200
+    depends_on:
+      - recommendation-db
+      - redis
+    networks:
+      nomnom-network:
+
+  # ===== EMAIL SERVICE =====
+  email-service:
+    build:
+      context: ../src/Services/EmailService/
+      dockerfile: EmailService.API/Dockerfile
+    ports:
+      - "5204:5204"
+    environment:
+      - ASPNETCORE_URLS=http://+:5204
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=email-db;Port=5432;Database=nomnom_email;Username=postgres;Password=NOMNOM123
+      - EmailSettings__SmtpServer=smtp.gmail.com
+      - EmailSettings__SmtpPort=587
+      - EmailSettings__SenderEmail=noreply@nomnomgo.com
+      - EmailSettings__SenderPassword=your-app-password
+      - RabbitMQ__Hostname=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      - email-db
+      - rabbitmq
+    networks:
+      nomnom-network:
+
+
+  # ===== DATABASES =====
+  identity-db:
+    image: postgres:15
+    container_name: identity-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: NOMNOM123
+      POSTGRES_DB: nomnom_identity
+    volumes:
+      - identity-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      nomnom-network:
+
+  recommendation-db:
+    image: postgres:15
+    container_name: recommendation-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: NOMNOM123
+      POSTGRES_DB: nomnom_recommendations
+    volumes:
+      - recommendation-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      nomnom-network:
+
+  menu-order-db:
+    image: postgres:15
+    container_name: menu-order-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: NOMNOM123
+      POSTGRES_DB: nomnom_menu_orders
+    volumes:
+      - menu-order-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    networks:
+      nomnom-network:
+
+  email-db:
+    image: postgres:15
+    container_name: email-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: NOMNOM123
+      POSTGRES_DB: nomnom_email
+    volumes:
+      - email-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    networks:
+      nomnom-network:
+
+  # ===== REDIS =====
+  redis:
+    image: redis:7-alpine
+    container_name: nomnom-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      nomnom-network:
+
+  # ===== RABBITMQ =====
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: nomnom-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      nomnom-network:
+
+  # ===== DATABASES ADMIN TOOLS =====
+
+  # ===== MONITORING =====
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nomnom-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      nomnom-network:
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nomnom-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      nomnom-network:
+
+volumes:
+  identity-postgres-data:
+  recommendation-postgres-data:
+  menu-order-postgres-data:
+  email-postgres-data:
+  redis-data:
+  rabbitmq-data:
+  pgladmin-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  nomnom-network:
+    driver: bridge

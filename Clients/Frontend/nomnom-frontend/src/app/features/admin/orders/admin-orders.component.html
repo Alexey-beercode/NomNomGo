@@ -1,0 +1,334 @@
+<!-- src/app/features/admin/orders/admin-orders.component.html -->
+
+<div class="admin-orders">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Управление заказами</h1>
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary"
+        (click)="refreshData()"
+        [disabled]="loading">
+        <span *ngIf="loading">🔄</span>
+        <span *ngIf="!loading">↻</span>
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+    <button class="alert-close" (click)="error = ''">×</button>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ getTotalOrders() }}</div>
+      <div class="stat-label">Всего заказов</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ getPendingOrders() }}</div>
+      <div class="stat-label">Ожидают</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ getActiveOrders() }}</div>
+      <div class="stat-label">В работе</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ getCompletedOrders() }}</div>
+      <div class="stat-label">Выполнено</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ formatCurrency(getTotalRevenue()) }}</div>
+      <div class="stat-label">Выручка</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <app-input
+          label="Поиск"
+          [value]="filters.search"
+          (valueChange)="onSearchChange($event)"
+          placeholder="Номер заказа, ресторан, адрес...">
+        </app-input>
+      </div>
+
+      <div class="filter-group">
+        <label>Статус</label>
+        <select [(ngModel)]="filters.status" (change)="onFilterChange()">
+          <option value="">Все статусы</option>
+          <option *ngFor="let status of getAllStatusOptions()" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>С даты</label>
+        <input
+          type="date"
+          [(ngModel)]="filters.dateFrom"
+          (change)="onFilterChange()">
+      </div>
+
+      <div class="filter-group">
+        <label>По дату</label>
+        <input
+          type="date"
+          [(ngModel)]="filters.dateTo"
+          (change)="onFilterChange()">
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-secondary" (click)="clearFilters()">
+          Очистить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Загрузка заказов...</p>
+  </div>
+
+  <!-- Orders table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="orders-table">
+      <thead>
+      <tr>
+        <th (click)="onSortChange('id')" class="sortable">
+          Номер {{ getSortIcon('id') }}
+        </th>
+        <th (click)="onSortChange('createdAt')" class="sortable">
+          Дата {{ getSortIcon('createdAt') }}
+        </th>
+        <th>Ресторан</th>
+        <th>Пользователь</th>
+        <th>Адрес доставки</th>
+        <th (click)="onSortChange('status')" class="sortable">
+          Статус {{ getSortIcon('status') }}
+        </th>
+        <th (click)="onSortChange('totalPrice')" class="sortable">
+          Сумма {{ getSortIcon('totalPrice') }}
+        </th>
+        <th>Действия</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let order of filteredOrders; trackBy: trackOrder" class="order-row">
+        <td class="order-number">
+          {{ getOrderNumber(order.id) }}
+        </td>
+        <td class="order-date">
+          <div>{{ formatDate(order.createdAt) }}</div>
+        </td>
+        <td class="restaurant-name">
+          {{ order.restaurant.name }}
+        </td>
+        <td class="user-id">
+          {{ order.userId }}
+        </td>
+        <td class="delivery-address">
+          {{ order.deliveryAddress }}
+        </td>
+        <td class="order-status">
+            <span [class]="'status-badge ' + getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </span>
+        </td>
+        <td class="order-total">
+          <div class="price-info">
+            <div class="total-price">{{ formatCurrency(order.totalPrice) }}</div>
+            <div *ngIf="order.discountAmount > 0" class="discount">
+              -{{ formatCurrency(order.discountAmount) }}
+            </div>
+          </div>
+        </td>
+        <td class="actions">
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="openViewModal(order)"
+            title="Просмотр">
+            👁️
+          </button>
+          <button
+            *ngIf="canChangeStatus(order.status)"
+            class="btn btn-sm btn-secondary"
+            (click)="openStatusModal(order)"
+            title="Изменить статус">
+            📝
+          </button>
+          <button
+            *ngIf="canChangeStatus(order.status) && order.status !== 'CANCELLED'"
+            class="btn btn-sm btn-danger"
+            (click)="openCancelModal(order)"
+            title="Отменить">
+            ❌
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div *ngIf="filteredOrders.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Заказы не найдены</h3>
+      <p *ngIf="filters.search || filters.status || filters.dateFrom || filters.dateTo">
+        Попробуйте изменить параметры фильтрации
+      </p>
+      <p *ngIf="!filters.search && !filters.status && !filters.dateFrom && !filters.dateTo">
+        Заказы еще не были созданы
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="modalState.isOpen" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modalState.title }}</h2>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- View Order Modal -->
+      <div *ngIf="modalState.type === 'view' && modalState.data" class="order-details">
+        <div class="detail-section">
+          <h3>Информация о заказе</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Номер заказа:</label>
+              <span>{{ getOrderNumber(modalState.data.id) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Дата создания:</label>
+              <span>{{ formatDateTime(modalState.data.createdAt) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Статус:</label>
+              <span [class]="'status-badge ' + getStatusClass(modalState.data.status)">
+                {{ getStatusText(modalState.data.status) }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <label>Ресторан:</label>
+              <span>{{ modalState.data.restaurant.name }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Пользователь:</label>
+              <span>{{ modalState.data.userId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Адрес доставки:</label>
+              <span>{{ modalState.data.deliveryAddress }}</span>
+            </div>
+            <div *ngIf="modalState.data.notes" class="detail-item full-width">
+              <label>Примечания:</label>
+              <span>{{ modalState.data.notes }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Состав заказа</h3>
+          <div class="order-items">
+            <div *ngFor="let item of modalState.data.items" class="order-item">
+              <div class="item-info">
+                <div class="item-name">{{ item.menuItem.name }}</div>
+                <div class="item-description">{{ item.menuItem.description }}</div>
+              </div>
+              <div class="item-quantity">{{ item.quantity }} шт.</div>
+              <div class="item-price">{{ formatCurrency(item.price) }}</div>
+              <div class="item-total">{{ formatCurrency(item.price * item.quantity) }}</div>
+            </div>
+          </div>
+
+          <div class="order-totals">
+            <div class="total-row">
+              <span>Сумма заказа:</span>
+              <span>{{ formatCurrency(modalState.data.totalPrice) }}</span>
+            </div>
+            <div *ngIf="modalState.data.discountAmount > 0" class="total-row discount">
+              <span>Скидка:</span>
+              <span>-{{ formatCurrency(modalState.data.discountAmount) }}</span>
+            </div>
+            <div class="total-row final">
+              <span>К оплате:</span>
+              <span>{{ formatCurrency(modalState.data.totalPrice - modalState.data.discountAmount) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Update Status Modal -->
+      <div *ngIf="modalState.type === 'status' && modalState.data" class="status-form">
+        <div class="form-group">
+          <label for="newStatus">Новый статус:</label>
+          <select id="newStatus" [(ngModel)]="statusUpdateForm.newStatus">
+            <option *ngFor="let status of getAvailableStatuses(modalState.data.status)"
+                    [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="statusNotes">Примечания (необязательно):</label>
+          <textarea
+            id="statusNotes"
+            [(ngModel)]="statusUpdateForm.notes"
+            placeholder="Дополнительная информация о смене статуса..."
+            rows="3">
+          </textarea>
+        </div>
+      </div>
+
+      <!-- Cancel Order Modal -->
+      <div *ngIf="modalState.type === 'cancel' && modalState.data" class="cancel-form">
+        <div class="warning-message">
+          <p>Вы уверены, что хотите отменить заказ {{ getOrderNumber(modalState.data.id) }}?</p>
+        </div>
+
+        <div class="form-group">
+          <label for="cancelReason">Причина отмены:</label>
+          <textarea
+            id="cancelReason"
+            [(ngModel)]="cancelReason"
+            placeholder="Укажите причину отмены заказа..."
+            rows="3"
+            required>
+          </textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Отмена
+      </button>
+
+      <button *ngIf="modalState.type === 'status'"
+              class="btn btn-primary"
+              (click)="updateOrderStatus()"
+              [disabled]="!statusUpdateForm.newStatus">
+        Обновить статус
+      </button>
+
+      <button *ngIf="modalState.type === 'cancel'"
+              class="btn btn-danger"
+              (click)="cancelOrder()"
+              [disabled]="!cancelReason?.trim()">
+        Отменить заказ
+      </button>
+    </div>
+  </div>
+</div>

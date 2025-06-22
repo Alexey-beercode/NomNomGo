@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">NomNomGo Курьер</string>
+    <string name="tab_orders">Заказы</string>
+    <string name="tab_profile">Профиль</string>
+    <string name="no_orders">Нет активных заказов</string>
+    <string name="accept_order">Принять заказ</string>
+    <string name="start_delivery">Начать доставку</string>
+    <string name="complete_delivery">Завершить доставку</string>
+    <string name="restaurant">Ресторан</string>
+    <string name="delivery_address">Адрес доставки</string>
+    <string name="order_total">Сумма заказа</string>
+    <string name="estimated_time">Время доставки</string>
+    <string name="courier_stats">Статистика курьера</string>
+    <string name="today_deliveries">Доставок сегодня</string>
+    <string name="active_deliveries">Активных доставок</string>
+    <string name="total_deliveries">Всего доставок</string>
+</resources>
