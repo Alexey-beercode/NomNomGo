@@ -88,30 +88,6 @@ services:
     networks:
       nomnom-network:
 
-  # ===== EMAIL SERVICE =====
-  email-service:
-    build:
-      context: ../src/Services/EmailService/
-      dockerfile: EmailService.API/Dockerfile
-    ports:
-      - "5204:5204"
-    environment:
-      - ASPNETCORE_URLS=http://+:5204
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=email-db;Port=5432;Database=nomnom_email;Username=postgres;Password=NOMNOM123
-      - EmailSettings__SmtpServer=smtp.gmail.com
-      - EmailSettings__SmtpPort=587
-      - EmailSettings__SenderEmail=noreply@nomnomgo.com
-      - EmailSettings__SenderPassword=your-app-password
-      - RabbitMQ__Hostname=rabbitmq
-      - RabbitMQ__Username=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - email-db
-      - rabbitmq
-    networks:
-      nomnom-network:
-
 
   # ===== DATABASES =====
   identity-db:
@@ -156,20 +132,6 @@ services:
     networks:
       nomnom-network:
 
-  email-db:
-    image: postgres:15
-    container_name: email-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: NOMNOM123
-      POSTGRES_DB: nomnom_email
-    volumes:
-      - email-postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5436:5432"
-    networks:
-      nomnom-network:
-
   # ===== REDIS =====
   redis:
     image: redis:7-alpine
@@ -199,47 +161,13 @@ services:
 
   # ===== DATABASES ADMIN TOOLS =====
 
-  # ===== MONITORING =====
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: nomnom-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-    networks:
-      nomnom-network:
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: nomnom-grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
-    volumes:
-      - grafana-data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      nomnom-network:
-
 volumes:
   identity-postgres-data:
   recommendation-postgres-data:
   menu-order-postgres-data:
-  email-postgres-data:
   redis-data:
   rabbitmq-data:
   pgladmin-data:
-  prometheus-data:
-  grafana-data:
 
 networks:
   nomnom-network:

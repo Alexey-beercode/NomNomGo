@@ -95,7 +95,7 @@ export class RestaurantService {
 
   // Utility methods for UI
   formatPrice(price: number): string {
-    return `${price.toFixed(2)} ₽`;
+    return `${price.toFixed(2)} руб`;
   }
 
   getDeliveryTime(restaurant: RestaurantResponse): string {
@@ -108,7 +108,7 @@ export class RestaurantService {
   getDeliveryFee(restaurant: RestaurantResponse, orderAmount: number): number {
     // Простая логика для стоимости доставки
     const freeDeliveryThreshold = 500;
-    return orderAmount >= freeDeliveryThreshold ? 0 : 99;
+    return orderAmount >= freeDeliveryThreshold ? 0 : 20;
   }
 
   isRestaurantOpen(restaurant: RestaurantResponse): boolean {

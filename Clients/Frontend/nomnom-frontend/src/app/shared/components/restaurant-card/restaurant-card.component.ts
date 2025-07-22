@@ -69,7 +69,7 @@ export class RestaurantCardComponent implements OnInit {
 
   private calculateDeliveryFee(): string {
     const fee = this.restaurantService.getDeliveryFee(this.restaurant, 0);
-    return fee === 0 ? 'Бесплатно' : `от ${fee}₽`;
+    return fee === 0 ? 'Бесплатно' : `от ${fee} руб`;
   }
 
   // Проверка открыт ли ресторан

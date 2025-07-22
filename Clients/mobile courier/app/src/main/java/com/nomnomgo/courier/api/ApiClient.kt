@@ -11,8 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private const val AUTH_BASE_URL = "http://192.168.238.9:5200/"
-    private const val ORDER_BASE_URL = "http://192.168.238.9:5202/"
+    private const val AUTH_BASE_URL = "http://192.168.46.9:5200/"
+    private const val ORDER_BASE_URL = "http://192.168.46.9:5202/"
 
     private var authToken: String? = null
 
